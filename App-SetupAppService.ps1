@@ -19,7 +19,7 @@ az appservice plan create -g $customLocationGroup -n $appplan `
 az webapp list-runtimes
 
 <#======================================
-Need to run below colland using Azure CLI
+Need to run below code using Azure CLI
 ======================================#>
 az webapp create \
     --plan 'arcwebappplan' \
@@ -32,4 +32,18 @@ az webapp create \
 git clone https://github.com/Azure-Samples/nodejs-docs-hello-world
 cd nodejs-docs-hello-world
 zip -r package.zip .
-az webapp deployment source config-zip --resource-group myResourceGroup --name <app-name> --src package.zip
+$compress = @{
+  Path = "C:\_dev\_github\Azure-AppService-on-Azure-ARC\_gitcode\nodejs-docs-hello-world"
+  CompressionLevel = "Fastest"
+  DestinationPath = "package.zip"
+}
+Compress-Archive @compress
+
+az webapp deployment source config-zip --resource-group $customLocationGroup --name $webapp --src package.zip
+
+az webapp create --plan $appplan --resource-group $customLocationGroup --name "arcwebapp-asif-container" --custom-location $customLocationId --deployment-container-image-name mcr.microsoft.com/appsvc/node:12-lts
+
+az webapp create --plan $appplan --resource-group $customLocationGroup --name "arcwebapp-swagger-container" --custom-location $customLocationId --deployment-container-image-name khanasif1/k8_client_user:rc2.5
+
+
+kubectl get pods --namespace appservice-ns --watch
